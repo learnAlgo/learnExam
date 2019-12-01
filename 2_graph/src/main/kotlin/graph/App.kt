@@ -7,5 +7,20 @@ package graph
 
 fun main(args: Array<String>) {
     println("hello number 3")
-
+    val numVertex = readLine()?.toInt()?:0
+    val builder = GraphBuilderImpl()
+    val listVertex = mutableListOf<String>()
+    val listEdges = mutableListOf<String>()
+    (0..numVertex-1).map{
+        val vertex = readLine()?:""
+        listVertex.add(vertex)
+    }
+    val numEdges = readLine()?.toInt()?:0
+    (0..numEdges-1).map{
+        val edges = readLine()?:""
+        listEdges.add(edges)
+    }
+    val startPos = readLine()?:""
+    val graph = builder.build(listVertex,listEdges)
+    println(graph.findMaximum(startPos).second)
 }
