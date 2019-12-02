@@ -21,9 +21,13 @@ class CashierImplTest{
             on{this.calculate(any(),any())}.thenReturn(100.0)
         }
 
+        val noDiscount = mock<DiscountStrategy>{
+            on{this.calculate(any(),any())}.thenReturn(0.0)
+        }
+
         val listDiscount = listOf(lowDiscount,mediumDiscount,highDiscount)
 
-        val cashier = CashierImpl(listDiscount)
+        val cashier = CashierImpl(listDiscount,noDiscount)
 
         val customer = Customer(CustomerType.GENERAL, 100)
         val bill = Bill(listOf(BillingItem(ProductType.GROCERIES, 1000.0)))

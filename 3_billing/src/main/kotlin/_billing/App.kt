@@ -15,8 +15,8 @@ fun main(args: Array<String>) {
     val customerSyamsul = Customer(CustomerType.GENERAL, 4)
     val customerKura = Customer( CustomerType.AFFILIATE, 4)
     val listDiscount = listOf(AffiliateDiscountStrategy(), EmployeeDiscountStrategy(),
-            LoyalCustomerStrategy(), TotalBillingDiscountStrategy())
-    val cashier = CashierImpl(listDiscount)
+            LoyalCustomerStrategy())
+    val cashier = CashierImpl(listDiscount, TotalBillingDiscountStrategy())
     println("once upun a time we have customer")
     println("Billy:" + customerBilly)
     println("Syamsul:"+customerSyamsul)
