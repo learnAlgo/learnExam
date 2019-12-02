@@ -2,22 +2,22 @@ package graph
 
 import java.util.*
 
-interface Graph{
-    fun findMaximum(start:String):Pair<Set<String>, Int>
-    fun getvertexMap():Map<String, Vertex>
+interface Graph {
+    fun findMaximum(start: String): Int
+    fun getvertexMap(): Map<String, Vertex>
 }
 
-interface GraphBuilder{
-    fun build(listVertex:List<String>, listEdges:List<String>):Graph
+interface GraphBuilder {
+    fun build(listVertex: List<String>, listEdges: List<String>): Graph
 }
 
-class GraphBuilderImpl:GraphBuilder{
+class GraphBuilderImpl : GraphBuilder {
     override fun build(listVertex: List<String>, listEdges: List<String>): Graph {
-       var mapVertex = listVertex.map{
-           val weight = it.substring(1).toInt()
-           val name = it.substring(0,1)
-           Vertex(name, weight, emptySet())
-       }.map { it.name to it }.toMap()
+        var mapVertex = listVertex.map {
+            val weight = it.substring(1).toInt()
+            val name = it.substring(0, 1)
+            Vertex(name, weight, emptySet())
+        }.map { it.name to it }.toMap()
 
         listEdges.forEach {
             val split = it.split("->")
@@ -34,72 +34,47 @@ class GraphBuilderImpl:GraphBuilder{
 }
 
 
-class SomeGraphImpl(val mapVertex:Map<String,Vertex>):Graph{
-    override fun findMaximum(start:String): Pair<Set<String>, Int> {
-        val stack = Stack<String>()
-        val visited = mutableMapOf<String, Boolean>()
-        val parent = mutableMapOf<String,String>()
-        val possibleOutCome = mutableListOf<Set<String>>()
+class SomeGraphImpl(val mapVertex: Map<String, Vertex>) : Graph {
+    override fun findMaximum(start: String): Int {
+        val finish = mutableSetOf<String>()
+        val explored = mutableSetOf<String>()
+        val distance:MutableMap<String, Pair<Set<String>,Int>> = mutableMapOf()
+
         mapVertex.keys.forEach {
-            visited.put(it, false)
-            parent.put(it,"")
+            distance.put(it, Pair(emptySet(),0))
         }
 
-        stack.push(start)
+        val startVertex = mapVertex[start]!!
+        explored.add(startVertex.name)
+        distance.put(startVertex.name, Pair(setOf(startVertex.name), startVertex.weight) )
 
-        while(stack.empty().not()){
-            val entryKey = stack.pop()
-            visited[entryKey] = true
-            val vertex = mapVertex[entryKey]!!
+        while(explored.isNotEmpty()){
+            val currentVertex = explored.first().let{mapVertex[it]!!}
+            val (setCurrent,distanceCurrent) = distance[currentVertex.name]!!
 
-            visit(vertex, parent, possibleOutCome)
-
-            if(vertex.listNeightbours.size > 0){
-                vertex.listNeightbours.forEach {
-                        stack.push(it)
-                        parent[it] = entryKey
+            //update table
+            currentVertex.listNeightbours.forEach {
+                val nextVertex = mapVertex[it]!!
+                val (set,value) = distance[nextVertex.name]?:Pair(emptySet(),0)
+                val isCombineBigger =  distanceCurrent + nextVertex.weight > value
+                val isNotPartOfSolution = set.contains(nextVertex.name).not()
+                if(isCombineBigger && isNotPartOfSolution){
+                    val newSet = set + currentVertex.name
+                    val newDistance = distanceCurrent + nextVertex.weight
+                    distance[nextVertex.name] = Pair(newSet, newDistance)
+                }
+                if(finish.contains(nextVertex.name).not()) {
+                    explored.add(nextVertex.name)
                 }
             }
+
+            explored.remove(currentVertex.name)
+            finish.add(currentVertex.name)
         }
-
-        return possibleOutCome.map{
-            val totalWeight = it.fold(0){cummulative, key ->
-                mapVertex[key]!!.weight+ cummulative
-            }
-            Pair(it, totalWeight)
-        }.sortedByDescending { it.second }.first()
+        return distance.maxBy { it.value.second }?.value?.second?:0
     }
-
-    private fun visit(vertex:Vertex,parent:Map<String,String>, possibleOutcome:MutableList<Set<String>>){
-        if( vertex.listNeightbours.size == 0){
-            val set = mutableSetOf<String>()
-            var current = vertex.name
-            set.add(current)
-
-            while(current !=""){
-                current = parent[current]?:""
-
-                if(current !="")
-                    set.add(current)
-
-            }
-
-            possibleOutcome.add(set)
-
-        }
-    }
-
-    private fun printParent(mapParent:Map<String, String>, start:String, end:String){
-        var current = end
-        while(current != start){
-            current = mapParent[current]!!
-        }
-        println()
-    }
-
 
     override fun getvertexMap(): Map<String, Vertex> {
         return mapVertex
     }
-
 }

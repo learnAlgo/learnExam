@@ -22,5 +22,5 @@ fun main(args: Array<String>) {
     }
     val startPos = readLine()?:""
     val graph = builder.build(listVertex,listEdges)
-    println(graph.findMaximum(startPos).second)
+    println(graph.findMaximum(startPos))
 }
